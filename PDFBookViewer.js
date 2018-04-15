@@ -37,8 +37,8 @@ export default class PDFBookViewer extends React.Component {
         pdf.getPage(1).then(page => {
           let viewport = page.getViewport(1);
 
-          const containerHeight = this.containerRef.current.clientHeight;
-          const pageScale = containerHeight / viewport.height * 2;
+          const containerHeight = this.containerRef.current.offsetHeight;
+          const pageScale = (containerHeight - 50) / viewport.height * 2;
 
           viewport = page.getViewport(pageScale);
 
@@ -179,6 +179,7 @@ export default class PDFBookViewer extends React.Component {
     const bookStyle = {
       width: this.state.page > 1 ? this.state.width * 2 : this.state.width * 2,
       left: (this.state.containerWidth / 2) - (this.state.width * scale / 2),
+      paddingTop: 50,
     }
 
     const pageStyle = {
@@ -187,15 +188,10 @@ export default class PDFBookViewer extends React.Component {
     }
 
     return (
-      <div className='container'>
-        <div>
-          <button onClick={() => this.prevPage()}>Prev</button>
-          <button onClick={() => this.nextPage()}>Next</button>
-          <button onClick={() => this.zoom()}>Zoom</button>
-        </div>
-        <div className='pdf-container' ref={this.containerRef}>
-          <div className={`pdf-book pdf-direction--${this.state.forward ? 'forward' : 'backward'} pdf-book--page-${this.state.page} pdf-book--${this.state.isZoomed ? 'zoomed' : 'not-zoomed'}`} style={bookStyle}>
-            <div className='pdf-page pdf-page--left' style={pageStyle}>
+      <div className='c-pdf-book-viewer'>
+        <div className='c-pdf-container' ref={this.containerRef}>
+          <div className={`c-pdf-book c-pdf-book--dir-${this.state.forward ? 'forward' : 'backward'} c-pdf-book--page-${this.state.page} c-pdf-book--${this.state.isZoomed ? 'zoomed' : 'not-zoomed'}`} style={bookStyle}>
+            <div className='c-pdf-page c-pdf-page--left' style={pageStyle}>
               {this.state.pages[0]}
               {this.state.pages[8]}
               {this.state.forward ? this.state.pages[6] : this.state.pages[2]}
@@ -203,7 +199,7 @@ export default class PDFBookViewer extends React.Component {
               {this.state.pages[4]}
               {this.state.page == 1 ? <canvas></canvas> : null}
             </div>
-            <div className='pdf-page pdf-page--right' style={pageStyle}>
+            <div className='c-pdf-page c-pdf-page--right' style={pageStyle}>
               {this.state.pages[1]}
               {this.state.pages[9]}
               {this.state.forward ? this.state.pages[7] : this.state.pages[3]}
@@ -211,6 +207,8 @@ export default class PDFBookViewer extends React.Component {
               {this.state.pages[5]}
             </div>
           </div>
+          <button className='c-nav c-nav--prev' onClick={() => this.prevPage()}></button>
+          <button className='c-nav c-nav--next' onClick={() => this.nextPage()}></button>
         </div>
       </div>
     )

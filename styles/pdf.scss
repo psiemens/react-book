@@ -1,0 +1,213 @@
+#js-pdf {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+.c-pdf-book-viewer {
+  height: 100%;
+}
+
+.c-pdf-container {
+  height: 100%;
+}
+
+.c-pdf-book {
+  position: absolute;
+  transform: scale(0.5);
+  transform-origin: 0% 0%;
+  transition: transform 0.25s;
+
+  &.c-pdf-book--zoomed {
+    transform: scale(1) translateX(0);
+  }
+
+  &.c-pdf-book--page-1 {
+    .c-pdf-page {
+      left: -25%;
+    }
+
+    .c-pdf-page--right {
+      background: url('../js/react-book/images/loader.gif');
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+  }
+
+  &:not(.pdf-book--page-1) {
+    .c-pdf-page--left canvas:last-child {
+      box-shadow: -8px 0px 25px -8px rgba(0,0,0,0.7);
+    }
+  }
+}
+
+.c-pdf-page {
+  display: inline-block;
+  position: relative;
+  transition: left 0.35s ease-in-out;
+  left: 0;
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    transition: opacity 0.25s;
+  }
+
+  &.c-pdf-page--left canvas {
+    transform-origin: 100% 0%;
+  }
+
+  &.c-pdf-page--right {
+    canvas {
+      transform-origin: 0% 0%;
+    }
+
+    canvas:last-child {
+      box-shadow: 8px 0px 25px -8px rgba(0,0,0,0.7);
+    }
+  }
+}
+
+.c-pdf-book--dir-forward {
+  &.c-pdf-book--page-1 {
+    .c-pdf-page--left {
+      visibility: hidden;
+    }
+  }
+
+  &.c-pdf-book--page-2 {
+    .c-pdf-page--left {
+      canvas:last-child {
+        transform-origin: 100% 0%;
+        backface-visibility: hidden;
+        animation: flipLeft 0.35s normal forwards ease-in-out;
+      }
+
+      canvas:not(:last-child) {
+        visibility: hidden;
+      }
+    }
+  }
+
+  &:not(.c-pdf-book--page-2) {
+    .c-pdf-page--left {
+      canvas:last-child {
+        transform: rotateY(180deg);
+        transform-origin: 100% 0%;
+        animation: flipLeft 0.35s normal forwards ease-in-out;
+      }
+    }
+  }
+
+  .c-pdf-page--right {
+    canvas:last-child {
+      animation: appear 0s normal 0.35s;
+      animation-fill-mode: forwards;
+      z-index: 100;
+    }
+
+    canvas:not(:last-child) {
+      transform-origin: 0% 0%;
+      backface-visibility: hidden;
+      animation: flipRight 0.35s normal forwards ease-in-out;
+    }
+  }
+}
+
+.c-pdf-book--dir-backward {
+  .c-pdf-page--left {
+    canvas:last-child {
+      animation: appear 0s normal 0.35s;
+      animation-fill-mode: forwards;
+      z-index: 100;
+    }
+
+    canvas:not(:last-child) {
+      transform: rotateY(180deg);
+      transform-origin: 100% 0%;
+      animation: flipRight 0.35s normal forwards ease-in-out;
+    }
+  }
+
+  .c-pdf-page--right {
+    canvas:last-child {
+      transform-origin: 0% 0%;
+      backface-visibility: hidden;
+      animation: flipLeft 0.35s normal forwards ease-in-out;
+    }
+  }
+}
+
+.c-nav-container {
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+
+.c-nav {
+  position: absolute;
+  width: 25%;
+  border: none;
+  height: 100%;
+  background-size: 50px 50px;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  background-image: url('../js/react-book/images/arrow.svg');
+
+  opacity: 0.4;
+  transition: opacity 0.4s;
+
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.c-nav--next {
+  right: 0;
+  background-position: 75% center;
+}
+
+.c-nav--prev {
+  left: 0;
+  background-position: 75% center;
+  transform: rotate(180deg);
+}
+
+@keyframes appear {
+  from {
+    z-index: 100;
+  }
+  to {
+    z-index: 300;
+  }
+}
+
+
+@keyframes flipLeft {
+  from {
+    transform: rotateY(180deg);
+  }
+  to {
+    transform: rotateY(0);
+  }
+}
+
+@keyframes flipRight {
+  from {
+    transform: rotateY(0);
+  }
+  to {
+    transform: rotateY(180deg);
+  }
+}
