@@ -82,6 +82,7 @@
       canvas:last-child {
         transform-origin: 100% 0%;
         backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
         animation: flipLeft 0.35s normal forwards ease-in-out;
       }
 
@@ -111,6 +112,7 @@
     canvas:not(:last-child) {
       transform-origin: 0% 0%;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       animation: flipRight 0.35s normal forwards ease-in-out;
     }
   }
@@ -135,6 +137,7 @@
     canvas:last-child {
       transform-origin: 0% 0%;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       animation: flipLeft 0.35s normal forwards ease-in-out;
     }
   }
