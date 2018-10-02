@@ -10,13 +10,14 @@
 
 .c-pdf-container {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .c-pdf-book {
-  position: absolute;
-  transform: scale(0.5);
-  transform-origin: 0% 0%;
-  transition: transform 0.25s;
+  transform-origin: 50% 0%;
+  // transition: transform 0.25s;
 
   &.c-pdf-book--zoomed {
     transform: scale(1) translateX(0);
@@ -37,6 +38,12 @@
   &:not(.pdf-book--page-1) {
     .c-pdf-page--left canvas:last-child {
       box-shadow: -8px 0px 25px -8px rgba(0,0,0,0.7);
+    }
+  }
+
+  &.c-pdf-book--last {
+    .c-pdf-page {
+      left: 25%;
     }
   }
 }
@@ -73,6 +80,12 @@
 .c-pdf-book--dir-forward {
   &.c-pdf-book--page-1 {
     .c-pdf-page--left {
+      visibility: hidden;
+    }
+  }
+
+  &.c-pdf-book--last {
+    .c-pdf-page--right {
       visibility: hidden;
     }
   }
