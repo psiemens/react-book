@@ -1,13 +1,13 @@
-import React from 'react';
+import React from 'react'
 
-const renderEvent = new Event('page-render');
+const renderEvent = new Event('page-render')
 
 export default class PDFBookPage extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
 
     this.showRenderedPage = this.showRenderedPage.bind(this)
-    this.canvasRef = React.createRef();
+    this.canvasRef = React.createRef()
 
     this.state = {
       height: 0,
@@ -17,29 +17,29 @@ export default class PDFBookPage extends React.Component {
   }
 
   componentDidMount() {
-    this.canvasRef.current.addEventListener('page-render', this.showRenderedPage);
+    this.canvasRef.current.addEventListener('page-render', this.showRenderedPage)
 
-    const viewport = this.props.page.getViewport(this.props.scale);
+    const viewport = this.props.page.getViewport(this.props.scale)
     this.setState({
       height: viewport.height,
       width: viewport.width,
-    });
+    })
 
-    var renderContext = {
+    const renderContext = {
       canvasContext: this.canvasRef.current.getContext('2d'),
       viewport: viewport
-    };
+    }
 
     this.props.page.render(renderContext)
       .then(() => {
         if (this.canvasRef.current) {
           this.canvasRef.current.dispatchEvent(renderEvent)
         }
-      });
+      })
   }
 
   componentWillUnmount() {
-    this.canvasRef.current.removeEventListener('page-render', this.showRenderedPage);
+    this.canvasRef.current.removeEventListener('page-render', this.showRenderedPage)
   }
 
   showRenderedPage() {
@@ -50,7 +50,7 @@ export default class PDFBookPage extends React.Component {
     let canvasStyle = {}
 
     if (this.props.page.pageIndex == 0) {
-      canvasStyle.opacity = this.state.isRendered ? 1 : 0;
+      canvasStyle.opacity = this.state.isRendered ? 1 : 0
     }
 
     return (

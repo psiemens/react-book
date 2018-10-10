@@ -17,10 +17,10 @@
 
 .c-pdf-book {
   transform-origin: 50% 0%;
-  // transition: transform 0.25s;
+  transition: transform 0.75s ease-in-out;
 
-  &.c-pdf-book--zoomed {
-    transform: scale(1) translateX(0);
+  &.c-pdf-book--dragging {
+    transition: none;
   }
 
   &.c-pdf-book--page-1 {
@@ -208,7 +208,6 @@
     z-index: 300;
   }
 }
-
 
 @keyframes flipLeft {
   from {

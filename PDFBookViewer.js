@@ -1,26 +1,28 @@
-import React from 'react';
+import React from 'react'
 
-import pdfjsLib from 'pdfjs-dist';
+import pdfjsLib from 'pdfjs-dist'
 
-import ReactPanZoom from '@ajainarayanan/react-pan-zoom';
+import PDFBookPage from './PDFBookPage'
 
-import PDFBookPage from './PDFBookPage';
+const zoomFactor = 2.5
 
 export default class PDFBookViewer extends React.Component {
   constructor(props) {
-    super(props);
+    super(props)
 
-    pdfjsLib.GlobalWorkerOptions.workerSrc = props.workerSrc;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = props.workerSrc
 
-    this.containerRef = React.createRef();
-    this.bookRef = React.createRef();
+    this.containerRef = React.createRef()
+    this.bookRef = React.createRef()
+
+    this.pdf = null
+    this.numPages = 0
+    this.pageScale = 0
+    this.width = 0
+    this.height = 0
 
     this.state = {
-      pdf: null,
       page: 1,
-      numPages: 0,
-      width: 0,
-      height: 0,
       forward: true,
       isZoomed: false,
       isDragging: false,
@@ -33,7 +35,11 @@ export default class PDFBookViewer extends React.Component {
         null,
         null,
         null,
-      ],
+        null,
+        null,
+        null,
+        null
+      ]
     }
   }
 
@@ -41,30 +47,31 @@ export default class PDFBookViewer extends React.Component {
     pdfjsLib.getDocument(this.props.url)
       .then(pdf => {
         pdf.getPage(1).then(page => {
-          let viewport = page.getViewport(1);
+          let viewport = page.getViewport(1)
 
-          const containerHeight = this.containerRef.current.offsetHeight;
-          const pageScale = (containerHeight - 30) / viewport.height * 2;
+          const containerHeight = this.containerRef.current.offsetHeight
+          const pageScale = (containerHeight - 30) / viewport.height * zoomFactor
 
-          viewport = page.getViewport(pageScale);
+          viewport = page.getViewport(pageScale)
+
+          this.pdf = pdf
+          this.numPages = pdf.numPages
+          this.pageScale = pageScale
+          this.height = viewport.height
+          this.width = viewport.width
 
           this.setState({
-            pdf: pdf,
-            scale: pageScale,
-            height: viewport.height,
-            width: viewport.width,
-            numPages: pdf.numPages,
             pages: [
-              null,                                              // Left prev 2
-              null,                                              // Right prev 2
-              null,                                              // Left prev 1
-              null,                                              // Right prev 1
-              null,                                              // Left curr
+              null,                                                  // Left prev 2
+              null,                                                  // Right prev 2
+              null,                                                  // Left prev 1
+              null,                                                  // Right prev 1
+              null,                                                  // Left curr
               <PDFBookPage key={1} page={page} scale={pageScale} />, // Right curr
-              null,                                              // Left next 1
-              null,                                              // Right next 1
-              null,                                              // Left next 2
-              null,                                              // Right next 2
+              null,                                                  // Left next 1
+              null,                                                  // Right next 1
+              null,                                                  // Left next 2
+              null,                                                  // Right next 2
             ]
           }, () => {
             Promise.all([
@@ -75,27 +82,37 @@ export default class PDFBookViewer extends React.Component {
             ]).then(pages => {
               this.setState({
                 pages: [
-                  null,                                                         // Left prev 2
-                  null,                                                         // Right prev 2
-                  null,                                                         // Left prev 1
-                  null,                                                         // Right prev 1
-                  null,                                                         // Left curr
-                  this.state.pages[5],                                          // Right curr
-                  <PDFBookPage key={2} page={pages[0]} scale={this.state.scale} />, // Left next 1
-                  <PDFBookPage key={3} page={pages[1]} scale={this.state.scale} />, // Right next 1
-                  <PDFBookPage key={4} page={pages[2]} scale={this.state.scale} />, // Left next 2
-                  <PDFBookPage key={5} page={pages[3]} scale={this.state.scale} />, // Right next 2
+                  null,                                                           // Left prev 2
+                  null,                                                           // Right prev 2
+                  null,                                                           // Left prev 1
+                  null,                                                           // Right prev 1
+                  null,                                                           // Left curr
+                  this.state.pages[5],                                            // Right curr
+                  <PDFBookPage key={2} page={pages[0]} scale={this.pageScale} />, // Left next 1
+                  <PDFBookPage key={3} page={pages[1]} scale={this.pageScale} />, // Right next 1
+                  <PDFBookPage key={4} page={pages[2]} scale={this.pageScale} />, // Left next 2
+                  <PDFBookPage key={5} page={pages[3]} scale={this.pageScale} />, // Right next 2
                 ]
               })
             })
           })
         })
-      });
+      })
+  }
+
+  updatePage(index, page) {
+    const pages = this.state.pages
+
+    pages[index] = (
+      <PDFBookPage key={page.pageIndex+1} page={page} scale={this.pageScale} />
+    )
+
+    this.setState({pages: pages})
   }
 
   nextPage() {
     this.setState({
-      page: this.state.page == 1 ? this.state.page + 1 : this.state.page + 2,
+      page: this.state.page == 1 ? 2 : this.state.page + 2,
       forward: true,
       pages: [
         this.state.pages[2],
@@ -110,24 +127,11 @@ export default class PDFBookViewer extends React.Component {
         null
       ]
     }, () => {
-      this.state.pdf.getPage(this.state.page + 4)
-        .then(page => {
-          let pages = this.state.pages;
-          pages[8] = (
-            <PDFBookPage key={page.pageIndex+1} page={page} scale={this.state.scale} />
-          )
+      this.pdf.getPage(this.state.page + 4)
+        .then(page => this.updatePage(8, page))
 
-          this.setState({pages: pages})
-        })
-
-      this.state.pdf.getPage(this.state.page + 5)
-        .then(page => {
-          let pages = this.state.pages;
-          pages[9] = (
-            <PDFBookPage key={page.pageIndex+1} page={page} scale={this.state.scale} />
-          )
-          this.setState({pages: pages})
-        })
+      this.pdf.getPage(this.state.page + 5)
+          .then(page => this.updatePage(9, page))
     })
   }
 
@@ -137,7 +141,7 @@ export default class PDFBookViewer extends React.Component {
     }
 
     this.setState({
-      page: this.state.page == 2 ? this.state.page - 1 : this.state.page - 2,
+      page: this.state.page == 2 ? 1 : this.state.page - 2,
       forward: false,
       pages: [
         null,
@@ -153,26 +157,13 @@ export default class PDFBookViewer extends React.Component {
       ]
     }, () => {
       if (this.state.page - 4 >= 1) {
-        this.state.pdf.getPage(this.state.page - 4)
-          .then(page => {
-            let pages = this.state.pages;
-            pages[0] = (
-              <PDFBookPage key={page.pageIndex+1} page={page} scale={this.state.scale} />
-            )
-
-            this.setState({pages: pages})
-          })
+        this.pdf.getPage(this.state.page - 4)
+          .then(page => this.updatePage(0, page))
       }
 
       if (this.state.page - 3 >= 1) {
-        this.state.pdf.getPage(this.state.page - 3)
-          .then(page => {
-            let pages = this.state.pages;
-            pages[1] = (
-              <PDFBookPage key={page.pageIndex+1} page={page} scale={this.state.scale} />
-            )
-            this.setState({pages: pages})
-          })
+        this.pdf.getPage(this.state.page - 3)
+          .then(page => this.updatePage(1, page))
       }
     })
   }
@@ -193,7 +184,7 @@ export default class PDFBookViewer extends React.Component {
     if (this.state.isZoomed) {
       this.setState({
         isZoomed: false,
-        currentPosition: [0, 0]
+        currentPosition: [0, 0],
       })
     } else {
       this.setState({
@@ -235,42 +226,33 @@ export default class PDFBookViewer extends React.Component {
 
     const [posX, posY] = this.state.currentPosition
 
+    const newX = posX + xDelta
+    const newY = posY + yDelta
+
     this.setState({
-      currentPosition: [posX + xDelta, posY + yDelta],
+      currentPosition: [newX, newY],
       lastPosition: [curX, curY]
     })
   }
 
-  onClick(e) {
-    if (this.state.isZoomed) {
-      return
-    }
-
-    this.toggleZoom(e)
-  }
-
   onDoubleClick(e) {
-    if (!this.state.isZoomed) {
-      return
-    }
-
     this.toggleZoom(e)
   }
 
   render() {
-    const scale = this.state.isZoomed ? 1 : 0.5;
+    const scale = this.state.isZoomed ? 1 : 1 / zoomFactor
 
-    const [zoomX, zoomY] = this.state.currentPosition
+    const [posX, posY] = this.state.currentPosition
 
     const bookStyle = {
-      transform: `scale(${scale}) translate(${zoomX}%, ${zoomY}%)`,
-      width: this.state.width * 2,
-      cursor: this.state.isZoomed ? 'grab' : 'zoom-in',
+      transform: `scale(${scale}) translate(${posX}%, ${posY}%)`,
+      cursor: this.state.isZoomed ? 'grab' : 'default',
+      width: this.width * 2,
     }
 
     const pageStyle = {
-      width: this.state.width,
-      height: this.state.height,
+      width: this.width,
+      height: this.height,
     }
 
     const prevButton = <button className='c-nav c-nav--prev' onClick={() => this.prevPage()}></button>
@@ -283,10 +265,9 @@ export default class PDFBookViewer extends React.Component {
         onMouseMove={(e) => this.onMouseMove(e)}>
         <div className='c-pdf-container' ref={this.containerRef}>
           <div
-            className={getBookClassNames(this.state)}
+            className={getBookClassNames(this.state, this.numPages)}
             ref={this.bookRef}
             style={bookStyle}
-            onClick={(e) => this.onClick(e)}
             onDoubleClick={(e) => this.onDoubleClick(e)}
             onMouseDown={(e) => this.startDragging(e)}>
             <div className='c-pdf-page c-pdf-page--left' style={pageStyle}>
@@ -306,26 +287,26 @@ export default class PDFBookViewer extends React.Component {
             </div>
           </div>
           {this.state.page > 1 && !this.state.isZoomed && prevButton}
-          {this.state.page < this.state.numPages && !this.state.isZoomed && nextButton}
+          {this.state.page < this.numPages && !this.state.isZoomed && nextButton}
         </div>
       </div>
     )
   }
 }
 
-function getBookClassNames(state) {
+function getBookClassNames(state, numPages) {
   const classNames = [
     'c-pdf-book',
     `c-pdf-book--dir-${state.forward ? 'forward' : 'backward'}`,
     `c-pdf-book--page-${state.page}`,
   ]
 
-  if (state.isZoomed) {
-    classNames.push('c-pdf-book--zoomed')
+  if (state.page === numPages) {
+    classNames.push('c-pdf-book--last')
   }
 
-  if (state.page === state.numPages) {
-    classNames.push('c-pdf-book--last')
+  if (state.isDragging) {
+    classNames.push('c-pdf-book--dragging')
   }
 
   return classNames.join(' ')
